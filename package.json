@@ -27,7 +27,7 @@
     "node": ">=22"
   },
   "dependencies": {
-    "openclaw-conversation-runtime": "file:../openclaw-conversation-runtime",
+    "openclaw-conversation-runtime": "github:tao-jl/openclaw-conversation-runtime#7c761bf",
     "qrcode-terminal": "0.12.0",
     "zod": "^4.3.6"
   },
