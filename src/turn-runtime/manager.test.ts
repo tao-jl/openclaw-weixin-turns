@@ -1,9 +1,15 @@
 import { describe, expect, it } from "vitest";
+import { ConversationTurnManager } from "openclaw-conversation-runtime";
 
 import { MessageItemType } from "../api/types.js";
 import type { WeixinMessage } from "../api/types.js";
 
-import { ConversationTurnManager } from "./manager.js";
+import {
+  buildMergedMessage,
+  extractText,
+  getPeerId,
+  isImmediateMessage,
+} from "./message-utils.js";
 
 function textMessage(text: string, overrides: Partial<WeixinMessage> = {}): WeixinMessage {
   return {
@@ -17,7 +23,11 @@ function textMessage(text: string, overrides: Partial<WeixinMessage> = {}): Weix
 describe("ConversationTurnManager", () => {
   it("coalesces consecutive plain text messages from the same peer", () => {
     const ready: Array<{ message: WeixinMessage; count: number }> = [];
-    const manager = new ConversationTurnManager({
+    const manager = new ConversationTurnManager<WeixinMessage>({
+      getPeerId,
+      extractText,
+      isImmediateMessage,
+      mergeMessages: buildMergedMessage,
       setTimer: () => 1,
       clearTimer: () => {},
       onReady: (message, metadata) => ready.push({ message, count: metadata.count }),
@@ -34,7 +44,11 @@ describe("ConversationTurnManager", () => {
 
   it("dispatches slash commands immediately", () => {
     const ready: Array<{ message: WeixinMessage; count: number }> = [];
-    const manager = new ConversationTurnManager({
+    const manager = new ConversationTurnManager<WeixinMessage>({
+      getPeerId,
+      extractText,
+      isImmediateMessage,
+      mergeMessages: buildMergedMessage,
       setTimer: () => 1,
       clearTimer: () => {},
       onReady: (message, metadata) => ready.push({ message, count: metadata.count }),
@@ -53,7 +67,11 @@ describe("ConversationTurnManager", () => {
       from_user_id: "user@im.wechat",
       item_list: [{ type: MessageItemType.IMAGE, image_item: {} }],
     };
-    const manager = new ConversationTurnManager({
+    const manager = new ConversationTurnManager<WeixinMessage>({
+      getPeerId,
+      extractText,
+      isImmediateMessage,
+      mergeMessages: buildMergedMessage,
       setTimer: () => 1,
       clearTimer: () => {},
       onReady: (message, metadata) => ready.push({ message, count: metadata.count }),
@@ -67,7 +85,11 @@ describe("ConversationTurnManager", () => {
 
   it("flushes pending text before immediate messages from the same peer", () => {
     const ready: Array<{ message: WeixinMessage; count: number }> = [];
-    const manager = new ConversationTurnManager({
+    const manager = new ConversationTurnManager<WeixinMessage>({
+      getPeerId,
+      extractText,
+      isImmediateMessage,
+      mergeMessages: buildMergedMessage,
       setTimer: () => 1,
       clearTimer: () => {},
       onReady: (message, metadata) => ready.push({ message, count: metadata.count }),

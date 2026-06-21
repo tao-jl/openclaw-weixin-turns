@@ -27,6 +27,7 @@
     "node": ">=22"
   },
   "dependencies": {
+    "openclaw-conversation-runtime": "file:../openclaw-conversation-runtime",
     "qrcode-terminal": "0.12.0",
     "zod": "^4.3.6"
   },

@@ -1,10 +1,17 @@
 import type { PluginRuntime } from "openclaw/plugin-sdk/core";
 import type { ChannelAccountSnapshot } from "openclaw/plugin-sdk/channel-contract";
+import { ConversationTurnManager } from "openclaw-conversation-runtime";
 
 import { getUpdates } from "../api/api.js";
+import type { WeixinMessage } from "../api/types.js";
 import { WeixinConfigManager } from "../api/config-cache.js";
 import { SESSION_EXPIRED_ERRCODE, pauseSession, getRemainingPauseMs } from "../api/session-guard.js";
-import { ConversationTurnManager } from "../turn-runtime/manager.js";
+import {
+  buildMergedMessage,
+  extractText,
+  getPeerId,
+  isImmediateMessage,
+} from "../turn-runtime/message-utils.js";
 import { processOneMessage } from "../messaging/process-message.js";
 import { getSyncBufFilePath, loadGetUpdatesBuf, saveGetUpdatesBuf } from "../storage/sync-buf.js";
 import { logger } from "../util/logger.js";
@@ -111,7 +118,11 @@ export async function monitorWeixinProvider(opts: MonitorWeixinOpts): Promise<vo
     });
   };
 
-  const turnManager = new ConversationTurnManager({
+  const turnManager = new ConversationTurnManager<WeixinMessage>({
+    getPeerId,
+    extractText,
+    isImmediateMessage,
+    mergeMessages: buildMergedMessage,
     onReady: (full, metadata) => {
       dispatchQueue = dispatchQueue
         .then(() => dispatchMessage(full, metadata))
